@@ -1,0 +1,13 @@
+::proc:transaction [AdventureWorks2019]
+
+CREATE PROCEDURE [HumanResources].[uspUpdateEmployeeHireInfo]
+    :EmployeeHireInfo @info
+
+:begin 
+
+       :updateEmployeeHire(@info)
+
+       :insertEmployeePayFrequency(@info)
+
+:end
+

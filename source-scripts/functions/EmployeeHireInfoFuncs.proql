@@ -1,0 +1,24 @@
+::lib
+
+:func updateEmployeeHire(id: int, title: string, date: dateTime, flag: bool ) {
+
+    UPDATE [HumanResources].[Employee] 
+        SET [JobTitle] = :title 
+            ,[HireDate] = :date 
+            ,[CurrentFlag] = :flag 
+        WHERE [BusinessEntityID] = :id; 
+}
+
+:map updateEmployeeHire<UpdateEmployeeHireInfo>(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
+
+
+:func insertEmployeePayFrequency(id: int, rate: float, frequency: string, date: datetime) {
+    INSERT INTO [HumanResources].[EmployeePayHistory] 
+            ([BusinessEntityID]
+            ,[RateChangeDate]
+            ,[Rate]
+            ,[PayFrequency]) 
+     VALUES (:id, :date, :rate, :frequency);
+}
+:map insertEmployeePayFrequency<UpdateEmployeeHireInfo>(BusinessEntityId, Rate, PayFrequency, RateChangeDate)
+

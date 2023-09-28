@@ -1,0 +1,11 @@
+::lib
+
+:struct UpdateEmployeeHireInfo {
+    BusinessEntityID [int], 
+    JobTitle [nvarchar](50), 
+    HireDate [datetime], 
+    RateChangeDate [datetime], 
+    Rate [money], 
+    PayFrequency [tinyint], 
+    CurrentFlag [dbo].[Flag]
+}

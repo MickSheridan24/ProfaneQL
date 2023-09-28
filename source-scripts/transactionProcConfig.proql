@@ -1,0 +1,34 @@
+:config transaction(db)
+
+USE :db
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+:yeild:begin
+
+WITH EXECUTE AS CALLER
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+:yeild:end
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback any active or uncommittable transactions before
+        -- inserting information in the ErrorLog
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+
+        EXECUTE [dbo].[uspLogError];
+    END CATCH;
+END;
