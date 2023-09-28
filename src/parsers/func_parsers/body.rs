@@ -1,3 +1,4 @@
+use std::fs::read;
 use crate::parsers::common::{ParseError, ReaderState, TagParseState};
 use crate::parsers::func_parsers::FuncTagParseState;
 use crate::tags::SqlType;
@@ -22,7 +23,7 @@ pub fn parse_func_body(
 ) -> Result<TagParseState, ParseError>
 {
     if reader.is_doc_end(contents) {
-        return Err(ParseError);
+        return Err(ParseError(reader.line(), reader.pos(), "ParseFuncBody: Doc Terminated Abruptly"));
     }
     if reader.is_line_end(contents) {
         //next line
@@ -32,7 +33,7 @@ pub fn parse_func_body(
         ));
     }
 
-    let c = reader.curr(contents, None);
+    let c = reader.curr((*contents).clone(), None);
 
     if c == "{" {
         if b == "" && *ty == BodyParseType::Unknown{
@@ -61,7 +62,7 @@ pub fn parse_func_body(
             return Ok(TagParseState::Func(
                 reader.next_pos(),
                 FuncTagParseState::Body(s.to_owned(), (*a).clone(),
-                                        BodyParseType::Block, b.to_owned() + c)
+                                        BodyParseType::Block, b.to_owned() + c.as_str())
             ))
         }
     }
@@ -72,10 +73,17 @@ pub fn parse_func_body(
         else {
             return Ok(TagParseState::Func(
                 reader.next_pos(),
-                FuncTagParseState::Body(s.to_owned(), (*a).clone(), (*ty).clone(), b.to_owned() + c)
+                FuncTagParseState::Body(s.to_owned(), (*a).clone(), (*ty).clone(), b.to_owned() + c.as_str())
             ))
         }
     }
+    if let Some(ch) = c.chars().nth(0) {
+        let m = s.to_owned() + c.as_str();
+        return Ok(TagParseState::Func(
+            reader.next_pos(),
+            FuncTagParseState::Body(s.to_owned(), (*a).clone(), (*ty).clone(), b.to_owned() + c.as_str())
+        ))
+    }
 
-    Err(ParseError)
+    Err(ParseError(reader.line(), reader.pos(), "ParseFuncBody"))
 }

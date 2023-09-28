@@ -1,7 +1,8 @@
+use std::fs::read;
 use crate::parsers::func_parsers::args::{ArgParseState, parse_func_args};
 use crate::parsers::func_parsers::body::{BodyParseType, parse_func_body};
 use crate::parsers::func_parsers::sym::parse_func_sym;
-use crate::tags::{FuncTag, SqlType, Tag, VarcharSize};
+use crate::tags::{FuncTag, SqlType, Tag};
 use super::common::{ParseError, ReaderState, TagParseState};
 
 pub mod args;
@@ -24,8 +25,8 @@ pub fn parse_func(
     if let FuncTagParseState::Sym(s) = func_state {
         return parse_func_sym(contents, reader, func_state, s);
     }
-    else if let FuncTagParseState::Args(s, mut a, p) = func_state {
-        return parse_func_args(contents, reader, &func_state, s, a, p);
+    else if let FuncTagParseState::Args(s, a, p) = func_state {
+        return parse_func_args(contents, reader, &func_state, s, (*a).clone(), p);
     }
     else if let FuncTagParseState::Body(s, a, t, b) = func_state {
         return parse_func_body(contents, reader, func_state, s, &a, &t, &b)
@@ -36,7 +37,7 @@ pub fn parse_func(
             args: (*a).clone(),
             body: b.to_owned(),
         };
-        return Ok(TagParseState::Complete(Tag::Func(tag)));
+        return Ok(TagParseState::Complete(reader.next_pos(), Tag::Func(tag)));
     }
-    Err(ParseError)
+    Err(ParseError(reader.line(), reader.pos(), "ParseFunc"))
 }

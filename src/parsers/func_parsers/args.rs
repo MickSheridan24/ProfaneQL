@@ -12,13 +12,12 @@ pub enum ArgParseState {
     TryComplete((String, String)),
 }
 
-
 pub fn parse_func_args(
     contents: &Vec<String>,
     reader: &ReaderState,
     func_state: &FuncTagParseState,
     s: &String,
-    mut a: Vec<(String, SqlType)>,
+    a: Vec<(String, SqlType)>,
     p: &ArgParseState,
 ) -> Result<TagParseState, ParseError> {
     // if reader.is_doc_end(&contents) {
@@ -33,33 +32,60 @@ pub fn parse_func_args(
         ));
     }
 
-    let c = reader.curr(&contents, None);
+    let c = reader.curr((*contents).clone(), None);
 
     return match p {
-        ArgParseState::None => parse_func_args_none(c, reader, func_state, s, a, &p),
-        ArgParseState::Limbo(esc, next) => parse_func_args_limbo(c, reader, func_state, s, &a, &p, esc, next),
-        ArgParseState::ArgName(n) => parse_func_args_name(c, reader, func_state, s, &a, &p, n),
-        ArgParseState::ArgType(n, t) => parse_func_args_type(c, reader, func_state, s, &a, &p, n, t),
-        ArgParseState::TryComplete(_) => todo!(),
+        ArgParseState::None => parse_func_args_none(c.as_str(), reader, func_state, &a, s),
+        ArgParseState::Limbo(esc, next) => parse_func_args_limbo(c.as_str(), reader, func_state, s, &a, esc, next),
+        ArgParseState::ArgName(n) => parse_func_args_name(c.as_str(), reader, s, &a, n),
+        ArgParseState::ArgType(n, t) => parse_func_args_type(c.as_str(), reader,  s, &a,  n, t),
+        ArgParseState::TryComplete((n, t)) => parse_func_args_try_complete(reader, s, &a,  n, t)
+    }
+}
+fn parse_func_args_try_complete(reader: &ReaderState,
+                                s: &String,
+                                a: &Vec<(String, SqlType)>,
+                                n: &String,
+                                t: &String) -> Result<TagParseState, ParseError>{
+    match parse_type(reader.line(), reader.pos(),  t) {
+        Ok(tt) => {
+            let mut ac = (*a).clone();
+            ac.push((n.to_owned(), tt));
+            return Ok(TagParseState::Func(reader.next_pos(),
+                                          FuncTagParseState::Body(s.to_owned(),
+                                                                  ac,
+                                                                  BodyParseType::Unknown,
+                                                                  "".to_string())));
+        },
+        Err(e) => return Err(e),
     }
 }
 
 fn parse_func_args_none(c: &str,
                         reader: &ReaderState,
                         func_state: &FuncTagParseState,
+                        a: &Vec<(String, SqlType)>,
                         s: &String,
-                        mut a: Vec<(String, SqlType)>,
-                        p: &ArgParseState) -> Result<TagParseState, ParseError> {
+) -> Result<TagParseState, ParseError> {
     if c.trim() == "" {
         return Ok(TagParseState::Func(reader.next_pos(), (*func_state).clone()));
     }
     if c == ")" {
         return Ok(TagParseState::Func(
             reader.next_pos(),
-            FuncTagParseState::Body(s.to_owned(), a, BodyParseType::Unknown, "".to_string()),
+            FuncTagParseState::Body(s.to_owned(), (*a).clone(), BodyParseType::Unknown, "".to_string()),
         ));
     }
-    return Err(ParseError);
+
+    if let Some(ch) = c.chars().nth(0) {
+        if ch.is_alphabetic() || ch == '_' {
+            return Ok(TagParseState::Func(reader.next_pos(),
+                                          FuncTagParseState::Args(s.to_owned(),
+                                                                  (*a).clone(),
+                                                                  ArgParseState::ArgName(c.to_owned()))));
+        }
+    }
+    return Err(ParseError(reader.line(), reader.pos(), "ParseArgs-None: Expected ')' or whitespace"));
 }
 
 fn parse_func_args_limbo(c: &str,
@@ -67,7 +93,7 @@ fn parse_func_args_limbo(c: &str,
                          func_state: &FuncTagParseState,
                          s: &String,
                          a: &Vec<(String, SqlType)>,
-                         p: &ArgParseState, esc: &Vec<String>, next: &Box<ArgParseState>
+                         esc: &Vec<String>, next: &Box<ArgParseState>
 ) -> Result<TagParseState, ParseError> {
 
     if c.trim() == ""{
@@ -76,20 +102,17 @@ fn parse_func_args_limbo(c: &str,
     if esc.contains(&c.to_string()) {
         return Ok(TagParseState::Func(
             reader.next_pos(),
-            FuncTagParseState::Args(s.to_owned(), (*a).clone(), **next),
+            FuncTagParseState::Args(s.to_owned(), (*a).clone(), (**next).clone()),
         ));
     }
-    Err(ParseError)
+    Err(ParseError(reader.line(), reader.pos(), "ParseArgs-Limbo: Expected whitespace or escape char"))
 }
 
 fn parse_func_args_name(c: &str,
                         reader: &ReaderState,
-                        func_state: &FuncTagParseState,
                         s: &String,
                         a: &Vec<(String, SqlType)>,
-                        p: &ArgParseState,
                         n: &String) -> Result<TagParseState, ParseError> {
-
     if c.trim() == "" {
         return Ok(TagParseState::Func(
             reader.next_pos(),
@@ -103,29 +126,46 @@ fn parse_func_args_name(c: &str,
             ),
         ))
     }
+    if c == ":"{
+        return Ok(TagParseState::Func(
+            reader.next_pos(),
+            FuncTagParseState::Args(
+                s.to_owned(),
+                (*a).clone(),
+                ArgParseState::ArgType(n.to_owned(), "".to_string())
+            ),
+        ))
+    }
 
     if let Some(ch) = c.chars().nth(0) {
         if ch.is_alphabetic() || ch == '_' {
-            return Ok(TagParseState::Func((reader.next_pos()),
+            return Ok(TagParseState::Func(reader.next_pos(),
                                           FuncTagParseState::Args(s.to_owned(),
                                                                   (*a).clone(),
                                                                   ArgParseState::ArgName(n.to_owned() + c))));
         }
     }
 
-    return Err(ParseError)
+    return Err(ParseError(reader.line(), reader.pos(), "ParseArgs-Name: Illegal character"))
 }
 
 fn parse_func_args_type(c: &str,
                         reader: &ReaderState,
-                        func_state: &FuncTagParseState,
                         s: &String,
-                        mut a: &Vec<(String, SqlType)>,
-                        p: &ArgParseState,
+                        a: &Vec<(String, SqlType)>,
                         n: &String,
                         t: &String) -> Result<TagParseState, ParseError> {
 
     if c.trim() == ""{
+        if t.to_owned() == ""{
+            return Ok(
+                TagParseState::Func(
+                    reader.next_pos(),
+                    FuncTagParseState::Args(s.to_owned(),
+                                            (*a).clone(),
+                                            ArgParseState::ArgType(n.to_owned(), "".to_owned()))));
+        }
+
         return Ok(TagParseState::Func(
             reader.next_pos(),
             FuncTagParseState::Args(
@@ -139,12 +179,13 @@ fn parse_func_args_type(c: &str,
         ));
     }
     if c == ")" {
-        match parse_type(t) {
+        match parse_type(reader.line(), reader.pos(),  t) {
             Ok(tt) => {
-                a.push((n.to_owned(), tt));
-                return Ok(TagParseState::Func((reader.next_pos()),
+                let mut ac = (*a).clone();
+                ac.push((n.to_owned(), tt));
+                return Ok(TagParseState::Func(reader.next_pos(),
                                       FuncTagParseState::Body(s.to_owned(),
-                                                              (*a).clone(),
+                                                              ac,
                                                               BodyParseType::Unknown,
                                                               "".to_string())));
             },
@@ -153,12 +194,13 @@ fn parse_func_args_type(c: &str,
     }
 
     if c == "," {
-        match parse_type(t) {
+        match parse_type(reader.line(), reader.pos(), t) {
             Ok(tt) => {
-                a.push((n.to_owned(), tt));
-                return Ok(TagParseState::Func((reader.next_pos()),
+                let mut ac = (*a).clone();
+                ac.push((n.to_owned(), tt));
+                return Ok(TagParseState::Func(reader.next_pos(),
                               FuncTagParseState::Args(s.to_owned(),
-                                                      (*a).clone(),
+                                                      ac,
                                                       ArgParseState::None)))
             },
             Err(e) => return Err(e),
@@ -176,13 +218,16 @@ fn parse_func_args_type(c: &str,
 }
     }
 
-    return Err(ParseError)
+    return Err(ParseError(reader.line(), reader.pos(), "ParseArgs-Type"))
 }
 
-fn parse_type(t: &String) -> Result<SqlType, ParseError> {
+fn parse_type(l: usize, pos: usize, t: &String) -> Result<SqlType, ParseError> {
     let tt = t.to_lowercase();
     if tt == "int"{
         return Ok(SqlType::Int);
+    }
+    if tt == "bool"{
+        return Ok(SqlType::Bit)
     }
     if tt.starts_with("varchar"){
         return Ok(SqlType::String(VarcharSize::Max))
@@ -193,7 +238,7 @@ fn parse_type(t: &String) -> Result<SqlType, ParseError> {
     if tt == "decimal"{
         return Ok(SqlType::Float)
     }
-    return Err(ParseError)
+    return Err(ParseError(l, pos, "ParseSqlType"))
 
 }
 

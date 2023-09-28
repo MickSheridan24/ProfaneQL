@@ -1,4 +1,4 @@
-use std::{fmt::Display};
+use std::fmt::Error;
 use crate::parsers::common::{ParseError, ReaderState, TagParseState};
 use crate::parsers::func_parsers::parse_func;
 use crate::parsers::none_parsers::parse_none;
@@ -39,6 +39,7 @@ pub enum SqlType {
     Int,
     DateTime,
     Float,
+    Bit
 }
 
 #[derive(Clone, Eq, PartialEq)]
@@ -55,14 +56,17 @@ impl Tag {
         let mut tags = vec![];
         while parse_stage != TagParseState::EndOfFile {
             let next = Self::parse_next(&contents, &parse_stage);
-            if let Ok(r) = next{
-                if let TagParseState::Complete(t) = r {
-                    tags.push(t);
+            match next {
+                Ok(r) => {
+                    if let TagParseState::Complete(reader, t) = r.clone() {
+                        tags.push(t);
+                        parse_stage = TagParseState::None(reader)
+                    }
+                    else {
+                        parse_stage = r.clone();
+                    }
                 }
-                parse_stage = r.clone();
-            }
-            if let Err(ParseError) = next{
-                panic!("Error Parsing File");
+                Err(e) => { panic!("Line {} Pos {} : {}", e.0, e.1, e.2); }
             }
         }
         return tags;
@@ -79,8 +83,8 @@ impl Tag {
                 parse_func( contents, reader, func_state),
             TagParseState::Struct(_, _) => todo!(),
             TagParseState::Map(_) => todo!(),
-            TagParseState::Complete(res) => Err(ParseError),
-            TagParseState::EndOfFile => Err(ParseError)
+            TagParseState::Complete(_, _) => Err(ParseError(0, 0, "Complete")),
+            TagParseState::EndOfFile => Err(ParseError(0, 0, "End Of File"))
         }
     }
 }

@@ -22,7 +22,9 @@ fn main() {
     for tag in tags{
         if let Tag::Func(t) = tag{
             let s = t.sym;
-            print!("{}",s.as_str());
+            println!("{}",s.as_str());
+            println!("{}", t.args.len());
+            println!("{}", t.body);
         }
     }
 }

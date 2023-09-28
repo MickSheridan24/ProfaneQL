@@ -1,3 +1,4 @@
+use std::fs::read;
 use crate::parsers::common::{ReaderState, TagParseState};
 use crate::tags::{StructTagParseState};
 
@@ -14,19 +15,19 @@ pub fn parse_none(contents: &Vec<String>, reader: &ReaderState) -> Result<TagPar
         return Ok(TagParseState::None(reader.next_line()));
     }
 
-    let c = reader.curr(contents, Option::None);
+    let c = reader.curr((*contents).clone(), Option::None);
     if c == ":" {
-        if reader.curr(contents, Some(8)) == ":struct " {
+        if reader.curr((*contents).clone(), Some(8)) == ":struct " {
             return Ok(TagParseState::Struct(
                 ReaderState(reader.line(), reader.pos() + 8),
                 StructTagParseState::Sym("".to_string()),
             ));
-        } else if reader.curr(contents, Some(6)) == ":func " {
+        } else if reader.curr((*contents).clone(), Some(6)) == ":func " {
             return Ok(TagParseState::Func(
                 ReaderState(reader.line(), reader.pos() + 5),
                 FuncTagParseState::Sym("".to_string()),
             ));
-        } else if reader.curr(contents, Some(5)) == ":map " {
+        } else if reader.curr((*contents).clone(), Some(5)) == ":map " {
             return Ok(TagParseState::Map(ReaderState(
                 reader.line(),
                 reader.pos() + 4,
@@ -36,5 +37,5 @@ pub fn parse_none(contents: &Vec<String>, reader: &ReaderState) -> Result<TagPar
         return Ok(TagParseState::None(reader.next_pos()));
     }
 
-    Err(ParseError)
+    Err(ParseError(reader.line(), reader.pos(), "ParseNone: Illegal Character"))
 }

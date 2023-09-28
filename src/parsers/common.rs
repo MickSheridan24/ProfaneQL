@@ -5,10 +5,10 @@ use crate::tags::{StructTagParseState, Tag};
 use super::func_parsers::FuncTagParseState;
 
 #[derive(Debug)]
-pub struct ParseError;
+pub struct ParseError(pub usize, pub usize, pub &'static str);
 
 impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Ok(())
     }
 }
@@ -36,18 +36,25 @@ impl ReaderState {
         self.1
     }
 
-    pub fn curr(&self, contents: &Vec<String>, range: Option<usize>) -> &str {
+    pub fn curr(&self, contents: Vec<String>, range: Option<usize>) -> String {
         let r = match range {
             None => 1,
             Some(c) => c,
         };
-        &contents[self.line()][self.pos()..self.pos() + r]
+        let r = contents[self.line()][self.pos()..self.pos() + r].to_owned().clone();
+        println!("{}",r);
+        r
     }
     pub fn is_line_end(&self, contents: &Vec<String>) -> bool {
-        !self.is_doc_end(contents) && self.1 > contents[self.0].len()
+        !self.is_doc_end(contents) && self.pos() >= contents[self.line()].len()
     }
+
+    pub fn has_left(&self, contents: Vec<String>, range: usize) -> bool{
+        contents[self.line()].len() >= range
+    }
+
     pub fn is_doc_end(&self, contents: &Vec<String>) -> bool {
-        self.0 > contents.len()
+        self.line() >= contents.len()
     }
 
     pub fn next_pos(&self) -> ReaderState {
@@ -64,7 +71,7 @@ pub enum TagParseState {
     Func(ReaderState, FuncTagParseState),
     Struct(ReaderState, StructTagParseState),
     Map(ReaderState),
-    Complete(Tag),
+    Complete(ReaderState, Tag),
     EndOfFile
 }
 

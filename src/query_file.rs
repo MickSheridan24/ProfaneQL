@@ -13,7 +13,7 @@ pub enum QueryFileType {
 pub struct ImproperSignatureError;
 
 impl Display for ImproperSignatureError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Ok(())
     }
 }
@@ -45,7 +45,7 @@ impl QueryFile {
                 raw_contents,
                 file_type: t,
             },
-            Err(e) => panic!("Header Type Not Found"),
+            Err(_) => panic!("Header Type Not Found"),
         }
     }
 
@@ -58,8 +58,4 @@ impl QueryFile {
         }
         Err(ImproperSignatureError)
     }
-
-    fn parse_lib() {}
-
-    fn parse_proc() {}
 }

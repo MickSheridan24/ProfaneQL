@@ -9,3 +9,5 @@
     PayFrequency [tinyint], 
     CurrentFlag [dbo].[Flag]
 }
+:map updateEmployeeHire<UpdateEmployeeHireInfo>(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
+:map insertEmployeePayFrequency<UpdateEmployeeHireInfo>(BusinessEntityId, Rate, PayFrequency, RateChangeDate)
