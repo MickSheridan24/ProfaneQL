@@ -13,15 +13,15 @@ pub fn parse_map_source(
     let res = parse_sym(contents, reader, map_state, s)?;
 
     match res {
-        ParseSymOutcome::Next(s) => return Ok(TagParseState::Map(
+        ParseSymOutcome::Next(r) => return Ok(TagParseState::Map(
             reader.next_pos(),
-            MapTagParseState::Source(s),
+            MapTagParseState::Source(r.to_owned()),
         )),
-        ParseSymOutcome::Escape(s, ch) => {
+        ParseSymOutcome::Escape(r, ch) => {
             if ch == ' ' {
                 return Ok(TagParseState::Map(
                     reader.next_pos(),
-                    MapTagParseState::Source(s),
+                    MapTagParseState::Source(r.to_owned()),
                 ));
             }
             else if ch == '#' {

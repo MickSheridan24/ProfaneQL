@@ -22,7 +22,7 @@ pub fn parse_map_target(
             if ch == '(' {
                 return Ok(TagParseState::Map(
                     reader.next_pos(),
-                    MapTagParseState::Args(s.to_owned(),t.to_owned(), vec![])
+                    MapTagParseState::Args(s.to_owned(),t.to_owned(), vec![], "".to_owned())
                 ));
             }
             else {
