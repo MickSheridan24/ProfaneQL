@@ -2,6 +2,7 @@ use crate::parsers::common::parse_error::ParseError;
 use crate::parsers::common::reader_state::ReaderState;
 use crate::parsers::common::tag_parse_state::TagParseState;
 use crate::parsers::func_parsers::parse_func;
+use crate::parsers::map_parsers::parse_map;
 use crate::parsers::none_parsers::parse_none;
 use crate::parsers::struct_parsers::parse_struct;
 
@@ -22,7 +23,12 @@ pub struct StructTag {
     pub sym: String,
     pub members: Vec<(String, SqlType)>,
 }
-
+#[derive(PartialEq, Eq, Clone)]
+pub struct MapTag {
+    pub strct: String,
+    pub fnc: String,
+    pub args: Vec<String>
+}
 
 #[derive(PartialEq, Eq, Clone)]
 pub enum VarcharSize {
@@ -44,6 +50,7 @@ pub enum SqlType {
 pub enum Tag {
     Func(FuncTag),
     Struct(StructTag),
+    Map(MapTag)
 }
 
 
@@ -81,7 +88,8 @@ impl Tag {
                 parse_func( contents, reader, func_state),
             TagParseState::Struct(reader, struct_state) =>
                 parse_struct(contents, reader, struct_state),
-            TagParseState::Map(_) => todo!(),
+            TagParseState::Map(reader, map_state) =>
+                parse_map(contents, reader, map_state),
             TagParseState::Complete(_, _) => Err(ParseError(0, 0, "Complete")),
             TagParseState::EndOfFile => Err(ParseError(0, 0, "End Of File"))
         }

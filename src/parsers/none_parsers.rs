@@ -1,4 +1,4 @@
-use super::{common::{tag_parse_state::TagParseState, reader_state::ReaderState, parse_error::ParseError}, struct_parsers::StructTagParseState, func_parsers::FuncTagParseState};
+use super::{common::{tag_parse_state::TagParseState, reader_state::ReaderState, parse_error::ParseError}, struct_parsers::StructTagParseState, func_parsers::FuncTagParseState, map_parsers::MapTagParseState};
 
 
 pub fn parse_none(contents: &Vec<String>, reader: &ReaderState) -> Result<TagParseState, ParseError> {
@@ -27,8 +27,9 @@ pub fn parse_none(contents: &Vec<String>, reader: &ReaderState) -> Result<TagPar
         } else if reader.curr((*contents).clone(), Some(5)) == ":map " {
             return Ok(TagParseState::Map(ReaderState(
                 reader.line(),
-                reader.pos() + 4,
-            )));
+                reader.pos() + 4),
+                MapTagParseState::Source("".to_string())
+            ));
         }
     } else if c.trim() == "" {
         return Ok(TagParseState::None(reader.next_pos()));

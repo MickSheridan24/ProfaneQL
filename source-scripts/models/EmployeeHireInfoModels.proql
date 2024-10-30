@@ -9,5 +9,5 @@
     PayFrequency: tinyint,
     CurrentFlag: bool
 )
-:map updateEmployeeHire<UpdateEmployeeHireInfo>(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
-:map insertEmployeePayFrequency<UpdateEmployeeHireInfo>(BusinessEntityId, Rate, PayFrequency, RateChangeDate)
+:map UpdateEmployeeHireInfo # updateEmployeeHire(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
+:map UpdateEmployeeHireInfo # insertEmployeePayFrequency(BusinessEntityId, Rate, PayFrequency, RateChangeDate)
