@@ -1,7 +1,7 @@
 pub mod file_load;
-pub mod parsers;
 pub mod query_file;
 pub mod tags;
+pub mod parsers;
 
 use file_load::load_dir;
 use query_file::QueryFileType;
@@ -18,13 +18,18 @@ fn main() {
             QueryFileType::Proc => todo!(),
         }
     }
-
+    println!("RESULTS");
     for tag in tags{
         if let Tag::Func(t) = tag{
             let s = t.sym;
             println!("{}",s.as_str());
             println!("{}", t.args.len());
             println!("{}", t.body);
+        }
+        else if let Tag::Struct(t) = tag {
+            let s = t.sym;
+            println!("{}",s.as_str());
+            println!("{}", t.members.len());
         }
     }
 }

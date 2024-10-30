@@ -1,13 +1,17 @@
-use std::fs::read;
-use crate::parsers::func_parsers::args::{ArgParseState, parse_func_args};
 use crate::parsers::func_parsers::body::{BodyParseType, parse_func_body};
-use crate::parsers::func_parsers::sym::parse_func_sym;
 use crate::tags::{FuncTag, SqlType, Tag};
-use super::common::{ParseError, ReaderState, TagParseState};
+
+use self::args::parse_func_args;
+use self::sym::parse_func_sym;
+
+use super::common::arg_parse_state::ArgParseState;
+use super::common::parse_error::ParseError;
+use super::common::reader_state::ReaderState;
+use super::common::tag_parse_state::TagParseState;
 
 pub mod args;
-pub mod body;
 pub mod sym;
+pub mod body;
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum FuncTagParseState {

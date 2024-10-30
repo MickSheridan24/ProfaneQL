@@ -1,7 +1,9 @@
-use std::fmt::Error;
-use crate::parsers::common::{ParseError, ReaderState, TagParseState};
+use crate::parsers::common::parse_error::ParseError;
+use crate::parsers::common::reader_state::ReaderState;
+use crate::parsers::common::tag_parse_state::TagParseState;
 use crate::parsers::func_parsers::parse_func;
 use crate::parsers::none_parsers::parse_none;
+use crate::parsers::struct_parsers::parse_struct;
 
 #[derive(PartialEq, Eq)]
 pub enum QueryFileType {
@@ -21,11 +23,6 @@ pub struct StructTag {
     pub members: Vec<(String, SqlType)>,
 }
 
-#[derive(PartialEq, Eq, Clone)]
-pub enum StructTagParseState {
-    Sym(String),
-    Members(String, Vec<(String, SqlType)>),
-}
 
 #[derive(PartialEq, Eq, Clone)]
 pub enum VarcharSize {
@@ -39,7 +36,8 @@ pub enum SqlType {
     Int,
     DateTime,
     Float,
-    Bit
+    Bit,
+    TinyInt
 }
 
 #[derive(Clone, Eq, PartialEq)]
@@ -81,7 +79,8 @@ impl Tag {
                 parse_none(&contents, reader),
             TagParseState::Func(reader, func_state) =>
                 parse_func( contents, reader, func_state),
-            TagParseState::Struct(_, _) => todo!(),
+            TagParseState::Struct(reader, struct_state) =>
+                parse_struct(contents, reader, struct_state),
             TagParseState::Map(_) => todo!(),
             TagParseState::Complete(_, _) => Err(ParseError(0, 0, "Complete")),
             TagParseState::EndOfFile => Err(ParseError(0, 0, "End Of File"))

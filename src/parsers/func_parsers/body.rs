@@ -1,5 +1,6 @@
-use std::fs::read;
-use crate::parsers::common::{ParseError, ReaderState, TagParseState};
+use crate::parsers::common::parse_error::ParseError;
+use crate::parsers::common::reader_state::ReaderState;
+use crate::parsers::common::tag_parse_state::TagParseState;
 use crate::parsers::func_parsers::FuncTagParseState;
 use crate::tags::SqlType;
 
@@ -77,8 +78,7 @@ pub fn parse_func_body(
             ))
         }
     }
-    if let Some(ch) = c.chars().nth(0) {
-        let m = s.to_owned() + c.as_str();
+    if let Some(_) = c.chars().nth(0) {
         return Ok(TagParseState::Func(
             reader.next_pos(),
             FuncTagParseState::Body(s.to_owned(), (*a).clone(), (*ty).clone(), b.to_owned() + c.as_str())

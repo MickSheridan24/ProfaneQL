@@ -1,0 +1,13 @@
+::lib
+
+:struct UpdateEmployeeHireInfo(
+    BusinessEntityID: int,
+    JobTitle: varchar,
+    HireDate: datetime,
+    RateChangeDate: datetime,
+    Rate: decimal,
+    PayFrequency: tinyint,
+    CurrentFlag: bool
+)
+:map updateEmployeeHire<UpdateEmployeeHireInfo>(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
+:map insertEmployeePayFrequency<UpdateEmployeeHireInfo>(BusinessEntityId, Rate, PayFrequency, RateChangeDate)

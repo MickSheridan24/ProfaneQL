@@ -1,8 +1,5 @@
-use std::fs::read;
-use crate::parsers::common::{ReaderState, TagParseState};
-use crate::tags::{StructTagParseState};
+use super::{common::{tag_parse_state::TagParseState, reader_state::ReaderState, parse_error::ParseError}, struct_parsers::StructTagParseState, func_parsers::FuncTagParseState};
 
-use super::{common::ParseError, func_parsers::FuncTagParseState};
 
 pub fn parse_none(contents: &Vec<String>, reader: &ReaderState) -> Result<TagParseState, ParseError> {
     if reader.is_doc_end(contents) {
