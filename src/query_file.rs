@@ -33,29 +33,17 @@ impl Error for ImproperSignatureError {
 
 pub struct QueryFile {
     pub path: String,
-    pub raw_contents: Vec<String>,
-    pub file_type: QueryFileType,
+    pub tokens: Vec<String>
 }
 
 impl QueryFile {
-    pub fn create(path: String, raw_contents: Vec<String>) -> QueryFile {
-        match Self::get_file_type(&raw_contents) {
-            Ok(t) => QueryFile {
-                path,
-                raw_contents,
-                file_type: t,
-            },
-            Err(_) => panic!("Header Type Not Found"),
-        }
-    }
+    pub fn create(path: String, raw_contents: String) -> QueryFile {
+        let tokens = raw_contents.split_whitespace().map(|f| f.to_owned()).collect();
 
-    fn get_file_type(raw_contents: &Vec<String>) -> Result<QueryFileType, ImproperSignatureError> {
-        let sig = &raw_contents[0];
-        if sig.starts_with("::lib") {
-            return Ok(QueryFileType::Lib);
-        } else if sig.starts_with("::proc") {
-            return Ok(QueryFileType::Proc);
+        QueryFile {
+                path,
+                tokens,
         }
-        Err(ImproperSignatureError)
+        
     }
 }

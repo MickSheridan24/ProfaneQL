@@ -13,10 +13,8 @@ fn main() {
     let mut tags: Vec<Tag> = vec![];
 
     for qf in r {
-        match qf.file_type {
-            QueryFileType::Lib => tags.extend(Tag::load_tags(qf.raw_contents)),
-            QueryFileType::Proc => todo!(),
-        }
+        //translate strings to real tokens 
+        //compute tokens to grammar
     }
     println!("RESULTS");
     for tag in tags{
