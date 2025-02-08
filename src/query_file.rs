@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fmt::{Debug, Display},
+    fmt::{Debug, Display}, os::linux::raw,
 };
 
 #[derive(PartialEq, Eq)]
@@ -33,12 +33,30 @@ impl Error for ImproperSignatureError {
 
 pub struct QueryFile {
     pub path: String,
-    pub tokens: Vec<String>
+    pub tokens: Vec<String>,
 }
 
 impl QueryFile {
     pub fn create(path: String, raw_contents: String) -> QueryFile {
-        let tokens = raw_contents.split_whitespace().map(|f| f.to_owned()).collect();
+
+        let mut tokens: Vec<String> = vec![];
+
+        let bytes = raw_contents.as_bytes();
+
+        let mut start = 0;
+
+        for (i, &item)in bytes.iter().enumerate(){
+            if item.is_ascii_whitespace() {
+                tokens.push(raw_contents[start..i].to_string());
+                start = i+1; 
+            }
+            else if item == b'(' || item == b')' || item == b'{' || item == b'}' || item == b','  {
+                tokens.push(raw_contents[start..i].to_string());
+                tokens.push(raw_contents[i..i+1].to_string());
+                start = i +1 ; 
+            }
+        }
+
 
         QueryFile {
                 path,
