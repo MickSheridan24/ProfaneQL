@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 
 
 
@@ -20,14 +22,10 @@ pub struct  LibraryParseState {
 impl LibraryParseState {
     pub fn new() -> LibraryParseState{
         LibraryParseState {
-            current_item: None, 
+            current_item: None.into(), 
             structs: vec![],
-            funcs: vec![], 
+            funcs: vec![]
         }
-    }
-
-    pub fn set_curr(&mut self, curr: LibraryItemParseState){
-        self.current_item = Some(curr); 
     }
 }
 
@@ -87,6 +85,10 @@ pub struct TypedValue (
 
 #[derive(Clone, Copy)]
 pub enum DataType {
-    NVarchar,
-    Int 
+    String,
+    Int,
+    Bool,
+    Decimal, 
+    TinyInt,
+    DateTime
 }
