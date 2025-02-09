@@ -22,7 +22,7 @@ pub fn load_dir(init_path: &str) -> Vec<QueryFile> {
             let file = fs::read_to_string(pathstr.clone())
                 .expect("Should have been able to read the file {pathstr}");
 
-            let qf = QueryFile::create(pathstr, file.split("\n").map(|r| r.to_string()).collect());
+            let qf = QueryFile::create(pathstr, file);
 
             ret.push(qf);
         } else if md.is_dir() {

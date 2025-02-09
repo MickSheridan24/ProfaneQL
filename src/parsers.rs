@@ -1,5 +1,5 @@
 pub mod common;
-pub mod func_parsers;
-pub mod struct_parsers;
-pub mod none_parsers;
-pub mod map_parsers;
+pub mod library_parse;
+pub mod func_parse;
+pub mod struct_parse;
+pub mod file_parse;

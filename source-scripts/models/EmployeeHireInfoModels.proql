@@ -1,13 +1,17 @@
-::lib
+#lib
 
-:struct UpdateEmployeeHireInfo(
+struct UpdateEmployeeHireInfo(
     BusinessEntityID: int,
-    JobTitle: varchar,
+    JobTitle: string,
     HireDate: datetime,
     RateChangeDate: datetime,
     Rate: decimal,
     PayFrequency: tinyint,
     CurrentFlag: bool
 )
-:map UpdateEmployeeHireInfo # updateEmployeeHire(BusinessEntityID, JobTitle, HireDate, CurrentFlag)
-:map UpdateEmployeeHireInfo # insertEmployeePayFrequency(BusinessEntityId, Rate, PayFrequency, RateChangeDate)
+
+
+struct TestSecondStruct ( 
+    Test1: int, 
+    Test2: string
+)
