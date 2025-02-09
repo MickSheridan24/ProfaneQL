@@ -1,7 +1,6 @@
 use std::{fmt::{self, Error}, path::Display, vec};
 
-use crate::parsers::common::file_parse_state::DataType;
-
+pub mod types;
 pub enum QueryToken {
     Header(HeaderType),
     Reserved(ReservedType),

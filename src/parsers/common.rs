@@ -1,9 +1,17 @@
 
-pub mod arg_parse_state;
-pub mod parse_error;
-pub mod reader_state;
-pub mod parse_symbol;
-pub mod file_parse_state;
-pub mod tag_parse_state;
-pub mod file_parser;
-mod tests;
+
+#[derive(Clone)]
+pub struct TypedValue (
+    pub String, 
+    pub  DataType
+);
+
+#[derive(Clone, Copy)]
+pub enum DataType {
+    String,
+    Int,
+    Bool,
+    Decimal, 
+    TinyInt,
+    DateTime
+}

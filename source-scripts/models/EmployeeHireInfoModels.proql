@@ -9,3 +9,9 @@ struct UpdateEmployeeHireInfo(
     PayFrequency: tinyint,
     CurrentFlag: bool
 )
+
+
+struct TestSecondStruct ( 
+    Test1: int, 
+    Test2: string
+)
