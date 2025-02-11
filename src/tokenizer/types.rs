@@ -19,7 +19,7 @@ impl QueryToken{
             QueryToken::Header(header_type) => "HEADER".to_owned(),
             QueryToken::Reserved(reserved_type) => "RESERVED".to_owned(),
             QueryToken::Symbol(_) => "SYM".to_owned(),
-            QueryToken::Punctuation(punctuation_type) => "PUNC".to_owned(),
+            QueryToken::Punctuation(punctuation_type) => format!("PUNC \"{0}\"", punctuation_type.to_string()).to_owned(),
             QueryToken::DataType(data_type) => "TYPE".to_owned(),
             QueryToken::Plain(s) => format!("PLAIN(\"{0}\")", s).to_owned(),
         }
@@ -33,6 +33,19 @@ pub enum PunctuationType{
     CurlyEnd,
     Comma,
     Colon
+}
+
+impl PunctuationType {
+    pub fn to_string(&self) -> String{
+        match  self {
+            PunctuationType::ParenStart => "(".to_string(),
+            PunctuationType::ParenEnd => ")".to_string(),
+            PunctuationType::CurlyStart => "{".to_string(),
+            PunctuationType::CurlyEnd => "}".to_string(),
+            PunctuationType::Comma => ",".to_string(),
+            PunctuationType::Colon => ":".to_string(),
+        }
+    }
 }
 
 

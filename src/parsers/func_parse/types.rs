@@ -1,27 +1,28 @@
 use crate::parsers::common::TypedValue;
 
 
-pub struct FuncParseState {
-    pub init: bool, 
+pub enum FuncParseState {
+    Symbol,
+    Init(String),
+    Args(String, Vec<TypedValue>),
+    InitBody(String, Vec<TypedValue>),
+    Body(String, Vec<TypedValue>, Vec<FuncToken>),
+    Complete(ParsedFunc)
 
-    pub args: Vec<TypedValue>
-}
-
-
-impl FuncParseState {
-    pub fn new() -> FuncParseState {
-        return FuncParseState{
-            init: false,
-            args: vec![]
-        }
-    }
-}
+    
+} 
 
 
 #[derive(Clone)]
 pub struct ParsedFunc {
     pub name: String ,
     pub args: Vec<TypedValue>,
-    pub body: String
+    pub sections: Vec<FuncToken>
 }
 
+
+#[derive(Clone)]
+pub enum FuncToken {
+    Plain(String), 
+    Symbol(String)
+}
